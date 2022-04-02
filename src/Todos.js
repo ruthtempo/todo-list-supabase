@@ -3,8 +3,13 @@ import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react';
 
+import { createClient } from '@supabase/supabase-js'
 
-function App() {
+const supabaseUrl = 'https://epowhiqqzsmspubeowcb.supabase.co'
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwb3doaXFxenNtc3B1YmVvd2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDg3Mzc0MzksImV4cCI6MTk2NDMxMzQzOX0.tO4iyhMjjcPrdutSm4XZB5hnFLItInI1EaDN2oG-kT0"
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+export function Todos(props) {
   const [todos, setTodos] = useState([
     {
       content: 'Pickup dry cleaning',
@@ -62,24 +67,29 @@ function App() {
     setTodos(temporaryTodos)
   }
 
-  function saveList() {
-    localStorage.setItem('todoList', JSON.stringify(todos))
+  async function getTodo() {
+
+    let { data: list, error } = await supabase
+      .from('list')
+      .select('*')
+      .eq('id', props.id) //gets array with object
+      .maybeSingle() //gets object or null
+
+    // console.log(list, error)
+    if (list !== null) { setTodos(list.todos) }
   }
 
-  //created
   useEffect(() => {
-    const retrievedString = localStorage.getItem("todoList")
-    const retrievedList = JSON.parse(retrievedString)
-    //console.log(retrievedList)
-    if (retrievedList) { setTodos(retrievedList) }
-  }, []);
+    getTodo()
+  }, [props.id])
 
+  async function saveList() {
+    const { data, error } = await supabase
+      .from('list')
+      .update({ todos: todos })
+      .eq('id', props.id)
+  }
 
-  //watch 
-  //callin the function to save every time the todos change
-  useEffect(() => {
-    saveList()
-  }, [todos])
 
 
   return (
@@ -112,4 +122,3 @@ function App() {
   );
 }
 
-export default App;

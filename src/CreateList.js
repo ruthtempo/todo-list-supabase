@@ -8,7 +8,7 @@ function useCreateList(props) {
     const { data, error } = await supabase
       .from('list')
       .insert([
-        { name: listName, todos: [] },
+        { name: listName, todos: [{ content: 'my first task', isCompleted: false }] },
       ])
     //notifies parent that list is created (with callback). parent decides how to handle this
     props.onListCreated()

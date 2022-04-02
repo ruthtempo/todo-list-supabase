@@ -1,15 +1,11 @@
 
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js'
 import { Todos } from './Todos';
+import { CreateList } from './CreateList';
+import { supabase } from './utils/supabase';
 
-const supabaseUrl = 'https://epowhiqqzsmspubeowcb.supabase.co'
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwb3doaXFxenNtc3B1YmVvd2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDg3Mzc0MzksImV4cCI6MTk2NDMxMzQzOX0.tO4iyhMjjcPrdutSm4XZB5hnFLItInI1EaDN2oG-kT0"
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-export function MyLists() {
-
+function useMyLists() {
   const [lists, setLists] = useState([])
   const [id, setId] = useState()
 
@@ -26,15 +22,31 @@ export function MyLists() {
     retrieveAll()
   }, [])
 
+  return {
+    lists,
+    setId,
+    retrieveAll,
+    id
+  }
+}
+
+export function MyLists() {
+  const {
+    lists,
+    setId,
+    retrieveAll,
+    id
+  } = useMyLists()
+
+
   return (
     <div>
+      <h1>my lists</h1>
       {lists.map((list) => (
         <h3 key={list.id} onClick={() => { setId(list.id) }}>
           {list.name}
         </h3>
-
-      ))
-      }
+      ))}
       <div>
         {id ? (
           <Todos id={id} />
@@ -42,6 +54,8 @@ export function MyLists() {
           <p> Please Select A List</p>
         )}
       </div>
+      {/*retrieve all lists once a list is created */}
+      <CreateList onListCreated={retrieveAll} />
     </div >
   )
 

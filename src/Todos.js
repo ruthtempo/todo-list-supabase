@@ -2,14 +2,9 @@ import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react';
+import { supabase } from './utils/supabase';
 
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://epowhiqqzsmspubeowcb.supabase.co'
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwb3doaXFxenNtc3B1YmVvd2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDg3Mzc0MzksImV4cCI6MTk2NDMxMzQzOX0.tO4iyhMjjcPrdutSm4XZB5hnFLItInI1EaDN2oG-kT0"
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-export function Todos(props) {
+function useTodos(props) {
   const [todos, setTodos] = useState([
     {
       content: 'Pickup dry cleaning',
@@ -22,7 +17,6 @@ export function Todos(props) {
       content: 'Build a todo app in React',
       isCompleted: false,
     }
-
   ])
 
   function handleKeyDown(e, i) {
@@ -68,13 +62,11 @@ export function Todos(props) {
   }
 
   async function getTodo() {
-
     let { data: list, error } = await supabase
       .from('list')
       .select('*')
       .eq('id', props.id) //gets array with object
       .maybeSingle() //gets object or null
-
     // console.log(list, error)
     if (list !== null) { setTodos(list.todos) }
   }
@@ -89,8 +81,25 @@ export function Todos(props) {
       .update({ todos: todos })
       .eq('id', props.id)
   }
+  //hook returns an object
+  return {
+    todos,
+    saveList,
+    toggleTodoCompleteAtIndex,
+    handleKeyDown,
+    updateTodoAtIndex
+  }
+}
 
-
+export function Todos(props) {
+  //component receives the return values of the hook 
+  const {
+    todos,
+    saveList,
+    toggleTodoCompleteAtIndex,
+    handleKeyDown,
+    updateTodoAtIndex
+  } = useTodos(props);
 
   return (
     <div className="app">
@@ -114,6 +123,7 @@ export function Todos(props) {
                 onChange={e => updateTodoAtIndex(e, i)}
               />
             </div>
+
           ))}
         </ul>
       </form>
